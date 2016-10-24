@@ -24,35 +24,31 @@ RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://raw.githubusercontent.com/
   wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.23-r3/glibc-2.23-r3.apk && \
   apk add glibc-2.23-r3.apk
 
-ENTRYPOINT ["sleep", "1000000000000000000"]
-
 # Download and compile gmp for CGAL
-RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.1.tar.bz2 && \
+RUN cd /root && \
+  wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.1.tar.bz2 && \
   bzip2 -dc gmp-6.1.1.tar.bz2 | tar xvf - && \
   cd gmp-6.1.1 && \
   ./configure && \
   make && \
   make check && \
-  make install && \
-  rm -rf gmp-6.1.1 gmp-6.1.1.tar.bz2
+  make install
 
 # Download and compile mpfr for CGAL
-RUN wget http://www.mpfr.org/mpfr-current/mpfr-3.1.5.tar.bz2 && \
+RUN cd /root && \
+  wget http://www.mpfr.org/mpfr-current/mpfr-3.1.5.tar.bz2 && \
   bzip2 -dc mpfr-3.1.5.tar.bz2 | tar xvf - && \
   cd mpfr-3.1.5 && \
   ./configure --with-gmp-build=/root/gmp-6.1.1 && \
   make && \
   make check && \
-  make install && \
-  rm -rf mpfr-3.1.5 mpfr-3.1.5.tar.bz2
+  make install
 
-# Download and compile Boost for CMake
-RUN wget http://sourceforge.net/projects/boost/files/boost/1.58.0/boost_1_58_0.tar.bz2 && \
-  bzip2 -dc boost_1_58_0.tar.bz2 | tar xvf - && \
-  cd boost_1_58_0 && \
-  ./bootstrap.sh && \
-  ./b2 && \
-  rm -rf boost_1_58_0 boost_1_58_0.tar.bz2
+# Clean
+RUN cd /root && \
+  rm -rf mpfr-3.1.5 mpfr-3.1.5.tar.bz2  gmp-6.1.1 gmp-6.1.1.tar.bz2
+
+ENTRYPOINT ["sleep", "1000000000000000000"]
 
 # # Download and compile CGAL
 # RUN wget https://gforge.inria.fr/frs/download.php/file/32994/CGAL-4.3.tar.gz && \
