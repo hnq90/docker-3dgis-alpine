@@ -44,8 +44,6 @@ RUN cd /root && \
   make check && \
   make install
 
-ENTRYPOINT ["sleep", "1000000000000000000"]
-
 # Download and compile CGAL
 RUN cd /root && \
   wget https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.9/CGAL-4.9.tar.xz && \
@@ -175,3 +173,5 @@ RUN cd /root && \
 
 # Expose PostgreSQL
 EXPOSE 5432
+
+ENTRYPOINT ["sleep", "1000000000000000000"]
