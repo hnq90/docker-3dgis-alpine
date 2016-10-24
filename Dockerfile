@@ -44,111 +44,134 @@ RUN cd /root && \
   make check && \
   make install
 
-# Clean
-RUN cd /root && \
-  rm -rf mpfr-3.1.5 mpfr-3.1.5.tar.bz2  gmp-6.1.1 gmp-6.1.1.tar.bz2
-
 ENTRYPOINT ["sleep", "1000000000000000000"]
 
-# # Download and compile CGAL
-# RUN wget https://gforge.inria.fr/frs/download.php/file/32994/CGAL-4.3.tar.gz && \
-#   tar -xzf CGAL-4.3.tar.gz && \
-#   cd CGAL-4.3 && \
-#   mkdir build && \
-#   cd build && \
-#   cmake .. && \
-#   make -j3 && \
-#   make install && \
+# Download and compile CGAL
+RUN cd /root && \
+  wget https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.9/CGAL-4.9.tar.xz && \
+  xz -df CGAL-4.9.tar.xz && \
+  tar -xvf CGAL-4.9.tar && \
+  cd CGAL-4.9 && \
+  mkdir build && \
+  cd build && \
+  cmake .. && \
+  make -j3 && \
+  make install
 
-# # download and compile SFCGAL
-# RUN git clone https://github.com/Oslandia/SFCGAL.git && \
-#   cd SFCGAL && \
-#   cmake . && \
-#   make -j3 && make install && \
-#   rm -Rf SFCGAL
+# Download and compile SFCGAL
+RUN cd /root && \
+  git clone https://github.com/Oslandia/SFCGAL.git && \
+  cd SFCGAL && \
+  cmake . && \
+  make -j3 && \
+  make install
 
-# # download and install GEOS 3.5
-# RUN wget http://download.osgeo.org/geos/geos-3.5.0.tar.bz2 && \
-#   tar -xjf geos-3.5.0.tar.bz2 && \
-#   cd geos-3.5.0 && \
-#   ./configure && make && make install && \
-#   cd .. && rm -Rf geos-3.5.0 geos-3.5.0.tar.bz2
+# Download and install GEOS 3.5
+RUN cd /root && \
+  wget http://download.osgeo.org/geos/geos-3.5.0.tar.bz2 && \
+  tar -xjf geos-3.5.0.tar.bz2 && \
+  cd geos-3.5.0 && \
+  ./configure && \
+  make && make install
 
-# # Download and compile PostGIS
-# RUN wget http://download.osgeo.org/postgis/source/postgis-2.2.0.tar.gz
-# RUN tar -xzf postgis-2.2.0.tar.gz
-# RUN cd postgis-2.2.0 && ./configure --with-sfcgal=/usr/local/bin/sfcgal-config --with-geos=/usr/local/bin/geos-config
-# RUN cd postgis-2.2.0 && make && make install
-# # cleanup
-# RUN rm -Rf postgis-2.2.0.tar.gz postgis-2.2.0
+# Download and compile PostGIS
+RUN cd /root && \
+  wget http://download.osgeo.org/postgis/source/postgis-2.2.0.tar.gz && \
+  tar -xzf postgis-2.2.0.tar.gz && \
+  cd postgis-2.2.0 && \
+  ./configure --with-sfcgal=/usr/local/bin/sfcgal-config --with-geos=/usr/local/bin/geos-config && \
+  cd postgis-2.2.0 && \
+  make && \
+  make install
 
-# # Download and compile pgrouting
-# RUN git clone https://github.com/pgRouting/pgrouting.git && \
-#     cd pgrouting && \
-#     mkdir build && cd build && \
-#     cmake -DWITH_DOC=OFF -DWITH_DD=ON .. && \
-#     make -j3 && make install
-# # cleanup
-# RUN rm -Rf pgrouting
+# Download and compile pgrouting
+RUN cd /root && \
+  git clone https://github.com/pgRouting/pgrouting.git && \
+  cd pgrouting && \
+  mkdir build && \
+  cd build && \
+  cmake -DWITH_DOC=OFF -DWITH_DD=ON .. && \
+  make -j3 && \
+  make install
 
-# # Download and compile ogr_fdw
-# RUN git clone https://github.com/pramsey/pgsql-ogr-fdw.git && \
-#     cd pgsql-ogr-fdw && \
-#     make && make install && \
-#     cd .. && rm -Rf pgsql-ogr-fdw
+# Download and compile ogr_fdw
+RUN cd /root && \
+  git clone https://github.com/pramsey/pgsql-ogr-fdw.git && \
+  cd pgsql-ogr-fdw && \
+  make && \
+  make install
 
-# # Compile PDAL
-# RUN git clone https://github.com/PDAL/PDAL.git pdal
-# RUN mkdir PDAL-build && \
-#     cd PDAL-build && \
-#     cmake ../pdal && \
-#     make -j3 && \
-#     make install
-# # cleanup
-# RUN rm -Rf pdal && rm -Rf PDAL-build
+# Download and compile PDAL
+RUN cd /root && \
+  git clone https://github.com/PDAL/PDAL.git pdal && \
+  mkdir PDAL-build && \
+  cd PDAL-build && \
+  cmake ../pdal && \
+  make -j3 && \
+  make install
 
-# # Compile PointCloud
-# RUN git clone https://github.com/pramsey/pointcloud.git
-# RUN cd pointcloud && ./autogen.sh && ./configure && make -j3 && make install
-# # cleanup
-# RUN rm -Rf pointcloud
+# Download and compile PointCloud
+RUN cd /root && \
+  git clone https://github.com/pramsey/pointcloud.git && \
+  cd pointcloud && \
+  ./autogen.sh && \
+  ./configure && \
+  make -j3 && \
+  make install
 
-# # get compiled libraries recognized
-# RUN ldconfig
+# Get compiled libraries recognized
+RUN ldconfig
 
-# # add a baseimage PostgreSQL init script
-# RUN mkdir /etc/service/postgresql
-# ADD postgresql.sh /etc/service/postgresql/run
+# Add a baseimage PostgreSQL init script
+RUN mkdir /etc/service/postgresql
+ADD postgresql.sh /etc/service/postgresql/run
 
-# # Adjust PostgreSQL configuration so that remote connections to the
-# # database are possible.
-# RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.5/main/pg_hba.conf
+# Adjust PostgreSQL configuration so that remote connections to the
+# database are possible.
+RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.5/main/pg_hba.conf
 
-# # And add ``listen_addresses`` to ``/etc/postgresql/9.5/main/postgresql.conf``
-# RUN echo "listen_addresses='*'" >> /etc/postgresql/9.5/main/postgresql.conf
+# And add ``listen_addresses`` to ``/etc/postgresql/9.5/main/postgresql.conf``
+RUN echo "listen_addresses='*'" >> /etc/postgresql/9.5/main/postgresql.conf
 
-# # Expose PostgreSQL
-# EXPOSE 5432
+# Add VOLUMEs to allow backup of config, logs and databases
+VOLUME  ["/data", "/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
-# # Add VOLUMEs to allow backup of config, logs and databases
-# VOLUME  ["/data", "/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
+# Add database setup upon image start
+ADD pgpass /root/.pgpass
+RUN chmod 700 /root/.pgpass && \
+  mkdir -p /etc/my_init.d
+ADD init_db_script.sh /etc/my_init.d/init_db_script.sh
+ADD init_db.sh /root/init_db.sh
 
-# # add database setup upon image start
-# ADD pgpass /root/.pgpass
-# RUN chmod 700 /root/.pgpass
-# RUN mkdir -p /etc/my_init.d
-# ADD init_db_script.sh /etc/my_init.d/init_db_script.sh
-# ADD init_db.sh /root/init_db.sh
+# Download and compile TinyOWS
+RUN cd /root && \
+  git clone https://github.com/mapserver/tinyows.git && \
+  cd tinyows && \
+  autoconf && \
+  ./configure --with-shp2pgsql=/usr/lib/postgresql/9.5/bin/shp2pgsql && \
+  make && \
+  make install && \
+  cp tinyows /usr/lib/cgi-bin/tinyows
 
-# # Compile TinyOWS
-# RUN git clone https://github.com/mapserver/tinyows.git
-# RUN cd tinyows && autoconf && ./configure --with-shp2pgsql=/usr/lib/postgresql/9.5/bin/shp2pgsql && make && make install && cp tinyows /usr/lib/cgi-bin/tinyows
-# # cleanup
-# RUN rm -Rf tinyows
+# get compiled libraries recognized
+RUN ldconfig
 
-# # get compiled libraries recognized
-# RUN ldconfig
+# Add TinyOWS configuration
+ADD tinyows.xml /etc/tinyows.xml
 
-# # Add TinyOWS configuration
-# ADD tinyows.xml /etc/tinyows.xml
+# Clean
+RUN cd /root && \
+  rm -rf mpfr-3.1.5 mpfr-3.1.5.tar.bz2 \
+  gmp-6.1.1 gmp-6.1.1.tar.bz2 \
+  CGAL-4.9 CGAL-4.9.tar \
+  SFCGAL \
+  geos-3.5.0 geos-3.5.0.tar.bz2 \
+  postgis-2.2.0.tar.gz postgis-2.2.0 \
+  pgrouting \
+  pgsql-ogr-fdw \
+  pdal PDAL-build \
+  pointcloud \
+  tinyows
 
+# Expose PostgreSQL
+EXPOSE 5432
